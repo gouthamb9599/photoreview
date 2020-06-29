@@ -1,0 +1,13 @@
+.logbutton{
+    float: right;
+position: absolute;
+right: 0;
+color: white;
+}
+.displayset{
+    margin-top: 40px;
+    align-items: left;
+    width: 100px;
+    margin-left: 236px;
+    padding-top: 43px;
+}
