@@ -1,6 +1,6 @@
-import React, { Component, render } from 'react'
-import { BrowserRouter as Router, Switch, Route, Link, withRouter } from 'react-router-dom';
-import { Redirect } from 'react-router-dom';
+import React, { Component } from 'react'
+// import { BrowserRouter as withRouter } from 'react-router-dom';
+// import { Redirect } from 'react-router-dom';
 import axios from 'axios'
 import './overall.css';
 
@@ -60,6 +60,5 @@ export class Login extends Component {
             </div>
         )
     }
-    ;
 }
-export default withRouter(Login);
+export default Login;

@@ -65,6 +65,7 @@ const route = app => {
 
     app.post('/imageupload', upload.single('image'), (req, res) => {
         const data = req.body;
+        // console.log(req);
         const name = req.file.filename;
         const str = `http://localhost:5000/images/${name}`;
         // console.log('69', str, data.description, data.owner, data.sharedid);

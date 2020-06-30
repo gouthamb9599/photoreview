@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import Dialog from '@material-ui/core/Dialog';
@@ -9,10 +9,6 @@ import Axios from 'axios';
 import { makeStyles } from '@material-ui/core/styles';
 import FormLabel from '@material-ui/core/FormLabel';
 import FormControl from '@material-ui/core/FormControl';
-import FormGroup from '@material-ui/core/FormGroup';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import FormHelperText from '@material-ui/core/FormHelperText';
-import Checkbox from '@material-ui/core/Checkbox';
 // import fileUpload from 'fuctbase64';
 import MenuItem from '@material-ui/core/MenuItem';
 import Select from '@material-ui/core/Select';
@@ -31,8 +27,6 @@ const useStyles = makeStyles((theme) => ({
 export default function FormDialog(props) {
     const classes = useStyles();
     const [open, setOpen] = React.useState(false);
-    const [upload, setUpload] = React.useState(false);
-    const [group, setGroup] = React.useState(false);
     const [inse, setInse] = React.useState(0);
     const [groupname, setGroupname] = React.useState('')
     const [SelectedFile, setSelectedFile] = React.useState(null);
@@ -43,16 +37,7 @@ export default function FormDialog(props) {
     const [userdata, setUserdata] = React.useState([currentuser.id]);
     const [desc, setDesc] = React.useState('');
 
-    useEffect((props, upload, group) => {
-        if (props.group === 1) {
-            setUpload(true);
-        }
-        if (props.group === 2) {
-            setGroup(true);
-        }
 
-        console.log(upload, group);
-    })
     const handleClickOpen = () => {
         setOpen(true);
     };
@@ -61,15 +46,15 @@ export default function FormDialog(props) {
         let formData = new FormData();
         // var datas = base64Img.base64Sync(SelectedFile);
         // formData.append("image64", datas)
-        console.log(Review);
+        // console.log(Review);
+        console.log(SelectedFile);
+        formData.append("image", SelectedFile);
         formData.set("sharedid", shareuser);
         formData.set("owner", data.id);
         formData.set("review", Review);
         formData.set("description", desc);
-        formData.append("image", SelectedFile);
-
         console.log(formData);
-        console.log(data, data.name, data.email, data.id);
+        // console.log(data, data.name, data.email, data.id);
         Axios.post('http://localhost:5000/imageupload', formData)
             .then(res => {
                 if (res.data.success === true) {
@@ -121,9 +106,14 @@ export default function FormDialog(props) {
         setOpen(false);
 
     }
+    const handleimage = (event) => {
+        console.log(event.target.value)
+        setSelectedFile(event.target.value)
+
+    }
     return (
         <div>
-            {upload ?
+            {props.upload ?
                 <div>
                     <Button variant="outlined" color="primary" onClick={handleClickOpen}>
                         Open Upload dialog
@@ -136,6 +126,7 @@ export default function FormDialog(props) {
                                 class="input-upload"
                                 name="myfile"
                                 accept="image/*"
+                                onChange={handleimage}
                             />
                             <TextField
                                 autoFocus
@@ -154,7 +145,6 @@ export default function FormDialog(props) {
                                 onChange={handleChange}>
                                 {props.users.map(data => (<MenuItem value={data.id}>{data.name}</MenuItem>))}
                                 {props.groups.map(data => (<MenuItem value={data.id}>{data.name}</MenuItem>))}
-
                             </Select>
                             <label>Do you want a Review ?</label>
                             <Select
@@ -177,8 +167,7 @@ export default function FormDialog(props) {
           </Button>
                         </DialogActions>
                     </Dialog>
-                </div> : <></>}
-            {group ?
+                </div> :
                 <div>
                     <Button variant="outlined" color="primary" onClick={handleClickOpen}>
                         Open Create Group
@@ -220,7 +209,7 @@ export default function FormDialog(props) {
           </Button>
                         </DialogActions>
                     </Dialog>
-                </div> : <></>}
+                </div>}
         </div>
     );
 }

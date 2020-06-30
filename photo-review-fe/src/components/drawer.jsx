@@ -1,10 +1,11 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Drawer from '@material-ui/core/Drawer';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import List from '@material-ui/core/List';
+import { Input } from '@material-ui/core';
 import Typography from '@material-ui/core/Typography';
 import Divider from '@material-ui/core/Divider';
 import ListItem from '@material-ui/core/ListItem';
@@ -16,8 +17,8 @@ import GroupAddTwoToneIcon from '@material-ui/icons/GroupAddTwoTone';
 import ImageTwoToneIcon from '@material-ui/icons/ImageTwoTone';
 import { Button } from '@material-ui/core';
 import Axios from 'axios';
+import swal from 'sweetalert';
 import Dialog from '../components/dialog';
-import live from '../images/image.png';
 import '../styles/drawer.css';
 
 const drawerWidth = 240;
@@ -59,28 +60,38 @@ export default function PermanentDrawerLeft(props) {
     const [openupload, setOpenupload] = React.useState(false);
     const [opencreateg, setOpencreateg] = React.useState(false);
     const [groups, setGroups] = React.useState(false);
-    const [dialog, setDialog] = React.useState(false);
+    const [review, setreview] = React.useState('');
+    const [review2, setreview2] = React.useState('');
     const viewusers = () => {
-
         setUsers(!users);
     }
+    const submit = () => {
+        const data = JSON.parse(localStorage.getItem('userData'));
+        setreview('');
+        swal('reply submitted successfully', 'check your other shared images', 'success');
+        Axios.post(`http://localhost:5000/postreview`, { id: data.id, review: review })
+    }
+
     const viewgroups = () => {
         const data = JSON.parse(localStorage.getItem('userData'));
         Axios.get(`http://localhost:5000/getgroups?userid=${data.id}`)
             .then(res => {
-                console.log(res);
+
                 if (res.data.success === true) {
                     setGroupsarray(res.data.data)
                 }
             })
         setGroups(!groups);
     }
-
-    const uploadimg = () => {
-        setOpenupload(true);
+    const handlereview = (event) => {
+        setreview(event.target.value);
+        setreview2(event.target.value)
     }
-    const creategroup = () => {
-        setOpencreateg(true);
+    const shareonclick2 = () => {
+        setShareddatag(!shareddatag)
+    }
+    const shareonclick1 = () => {
+        setShareddatau(!shareddatau)
     }
     const viewuploads = () => {
         const data = JSON.parse(localStorage.getItem('userData'));
@@ -93,28 +104,28 @@ export default function PermanentDrawerLeft(props) {
             })
         setUploads(!uploads);
     }
-    const handleClickuser = (id) => {
-        Axios.get(`http://localhost:5000/getshareduserimages?id=${id}`)
-            .then(res => {
-                // console.log(res);
-                if (res.data.success == true) {
-                    setUsershared(res.data.data)
-                    setShareddatau(true);
-                    // console.log(res.data.data);
-                }
+    // const handleClickuser = (id) => {
+    //     Axios.get(`http://localhost:5000/getshareduserimages?id=${id}`)
+    //         .then(res => {
+    //             // console.log(res);
+    //             if (res.data.success === true) {
+    //                 setUsershared(res.data.data)
+    //                 setShareddatau(true);
+    //                 // console.log(res.data.data);
+    //             }
 
-            })
-    }
-    const handleClickgroup = (id) => {
-        Axios.get(`http://localhost:5000/getsharedgroupimages?id=${id}`)
-            .then(res => {
-                // console.log(res);
-                if (res.data.success == true) {
-                    setGroupshared(res.data.data);
-                }
-            })
+    //         })
+    // }
+    // const handleClickgroup = (id) => {
+    //     Axios.get(`http://localhost:5000/getsharedgroupimages?id=${id}`)
+    //         .then(res => {
+    //             // console.log(res);
+    //             if (res.data.success === true) {
+    //                 setGroupshared(res.data.data);
+    //                 setShareddatag(true);
+    //             }
+    //         })}
 
-    }
 
     return (
         <div id="set">
@@ -133,45 +144,47 @@ export default function PermanentDrawerLeft(props) {
                         }} className="logbutton" onClick={props.logout} variant="h6" noWrap>Logout</Button>
                     </Toolbar>
                 </AppBar>
-                <Drawer
-                    className={classes.drawer}
-                    variant="permanent"
-                    classes={{
-                        paper: classes.drawerPaper,
-                    }}
-                    anchor="left"
-                >
-                    <div className={classes.toolbar} />
+                <div className="draw">
+                    <Drawer
+                        className={classes.drawer}
+                        variant="permanent"
+                        classes={{
+                            paper: classes.drawerPaper,
+                        }}
+                        anchor="left"
+                    >
+                        <div className={classes.toolbar} />
 
-                    <Divider />
-                    <List>
-                        <ListItem button onClick={e => viewusers()} key='Users'>
-                            <AccountCircleTwoToneIcon />
-                            <ListItemText primary='Users' />
-                        </ListItem>
-                        <ListItem button onClick={e => viewgroups()} key='Groups'>
-                            <GroupTwoToneIcon />
-                            <ListItemText primary='Groups' />
-                        </ListItem>
-                        <ListItem button onClick={e => viewuploads()} key='Uploads'>
-                            <ImageTwoToneIcon />
-                            <ListItemText primary='Uploads' />
-                        </ListItem>
-                    </List>
-                    <Divider />
-                    <List>
-                        <ListItem button onClick={() => setOpenupload(!openupload)} key='Upload Photo'>
-                            <AddPhotoAlternateTwoToneIcon />
-                            <ListItemText primary='Upload Photo' />
-                        </ListItem>
-                        <ListItem button onClick={() => setOpencreateg(!opencreateg)} key='Create Group'>
-                            <GroupAddTwoToneIcon />
-                            <ListItemText primary='Create Group' />
-                        </ListItem>
-                    </List>
-                    {openupload ? <Dialog group={1} users={props.users} groups={groupsarray}></Dialog> : <></>}
-                    {opencreateg ? <Dialog group={2} users={props.users} groups={groupsarray}></Dialog> : <></>}
-                </Drawer>
+                        <Divider />
+                        <List>
+                            <ListItem button onClick={e => viewusers()} key='Users'>
+                                <AccountCircleTwoToneIcon />
+                                <ListItemText primary='Users' />
+                            </ListItem>
+                            <ListItem button onClick={e => viewgroups()} key='Groups'>
+                                <GroupTwoToneIcon />
+                                <ListItemText primary='Groups' />
+                            </ListItem>
+                            <ListItem button onClick={e => viewuploads()} key='Uploads'>
+                                <ImageTwoToneIcon />
+                                <ListItemText primary='Uploads' />
+                            </ListItem>
+                        </List>
+                        <Divider />
+                        <List>
+                            <ListItem button onClick={() => setOpenupload(!openupload)} key='Upload Photo'>
+                                <AddPhotoAlternateTwoToneIcon />
+                                <ListItemText primary='Upload Photo' />
+                            </ListItem>
+                            <ListItem button onClick={() => setOpencreateg(!opencreateg)} key='Create Group'>
+                                <GroupAddTwoToneIcon />
+                                <ListItemText primary='Create Group' />
+                            </ListItem>
+                        </List>
+                        {openupload ? <Dialog upload={true} users={props.users} groups={groupsarray}></Dialog> : <></>}
+                        {opencreateg ? <Dialog upload={false} users={props.users} groups={groupsarray}></Dialog> : <></>}
+                    </Drawer>
+                </div>
             </div>
             <div>
                 {users ? <div className="displayset">
@@ -179,29 +192,51 @@ export default function PermanentDrawerLeft(props) {
                     <div >
                         {props.users.map((data) => (
                             <div>
-                                <Button onClick={handleClickuser(data.id)}>{data.name}</Button>
+                                <Button >{data.name}</Button>
                             </div>))}
+                        <h3>Image shared by :praveen</h3>
+                        <Button color="primary" onClick={shareonclick1}>show images</Button>
                     </div>
                 </div> : <></>}
                 {groups ? <div className="displayset">
                     <h3>Groups</h3>
                     <div>
                         {groupsarray.map((data) => (<div>
-                            <Button onClick={handleClickgroup(data.id)}>{data.name}</Button>
+                            <Button >{data.name}</Button>
                         </div>))}
+                        <Button >friends share</Button>
+                        <h3>Image shared to :friends share</h3>
+                        <Button color="primary" onClick={shareonclick2}>show images</Button>
                     </div>
                 </div> : <></>}
                 {uploads ? <div className="displayset">
                     {uploadarray.map(data =>
                         <div>
                             ID:{data.id}
-                            <img src={live} height="100" width="200" />
+                            <img src={live} alt="live" height="100" width="200" />
                         </div>
                     )}
                 </div> : <></>}
-                <div>
+                {shareddatau ? <div>
+                    <div>{usershared.map(data => <div>
+                        <img src={data.image} height="100" width="200" />)
+                    {data.review ?
+                            <div><Input type="text" value={review} onChange={handlereview} placeholder="Enter your reply"></Input>
+                                <Button onClick={submit}>submit</Button></div> : <></>}
+                    </div>
+                                </div>}
 
-                </div>
+                </div> : <></>}
+                {shareddatag ?
+                    <div>{groupshared.map(data => <div>
+                        <img src={data.image} height="100" width="200" />)
+                    {data.review ?
+                            <div><Input type="text" value={review} onChange={handlereview} placeholder="Enter your reply"></Input>
+                                <Button onClick={submit}>submit</Button></div> : <></>}
+                    </div>
+                                </div>}
+
+
             </div>
 
         </div>

@@ -1,10 +1,10 @@
 import React from "react";
 import "./overall.css";
-import { BrowserRouter as Router, Switch, Route, Link, withRouter } from 'react-router-dom';
-import InputLabel from '@material-ui/core/InputLabel';
+// import { BrowserRouter as withRouter } from 'react-router-dom';
+// import InputLabel from '@material-ui/core/InputLabel';
 // import NativeSelect from '@material-ui/core/NativeSelect';
-import Select from '@material-ui/core/Select';
-import { MenuItem } from "@material-ui/core";
+// import Select from '@material-ui/core/Select';
+// import { MenuItem } from "@material-ui/core";
 // import { Redirect } from 'react0-router-dom';
 // import history from './history';
 import axios from "axios";
@@ -31,6 +31,7 @@ class SignupDiv extends React.Component {
         return (false)
     }
     signup = (e) => {
+        // e.preventdefault();
         console.log(this.state.name);
         if (this.state.name === "") {
             swal("warning", "Enter your name", "warning");
@@ -46,6 +47,7 @@ class SignupDiv extends React.Component {
                 if (res.data.success === true) {
                     console.log('data entered successfully')
                     swal("you have registered successfully", "login into your account", "success")
+                    this.props.history.push('/')
                 }
             });
         }
@@ -67,7 +69,6 @@ class SignupDiv extends React.Component {
                             id="name"
                             name="name"
                             placeholder="Name"
-                            className="form-alignments"
                             onChange={e => this.handleChange(e)}
                         />
                         <input
@@ -114,4 +115,4 @@ class SignupDiv extends React.Component {
             </div>)
     }
 }
-export default withRouter(SignupDiv);
+export default SignupDiv;

@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Switch, Route, Link, withRouter } from 'react-router-dom';
+// import { BrowserRouter as withRouter } from 'react-router-dom';
 import Drawer from '../components/drawer';
 import Axios from 'axios';
 class Homepage extends React.Component {
@@ -34,4 +34,4 @@ class Homepage extends React.Component {
     };
 
 }
-export default withRouter(Homepage);
+export default Homepage;
