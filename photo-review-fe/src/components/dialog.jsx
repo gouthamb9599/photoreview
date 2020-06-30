@@ -4,7 +4,6 @@ import TextField from '@material-ui/core/TextField';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Axios from 'axios';
 import { makeStyles } from '@material-ui/core/styles';
@@ -18,6 +17,7 @@ import Checkbox from '@material-ui/core/Checkbox';
 import MenuItem from '@material-ui/core/MenuItem';
 import Select from '@material-ui/core/Select';
 import swal from 'sweetalert';
+
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -33,24 +33,22 @@ export default function FormDialog(props) {
     const [open, setOpen] = React.useState(false);
     const [upload, setUpload] = React.useState(false);
     const [group, setGroup] = React.useState(false);
+    const [inse, setInse] = React.useState(0);
+    const [groupname, setGroupname] = React.useState('')
     const [SelectedFile, setSelectedFile] = React.useState(null);
-    const [imagePreviewUrl, setimagePreviewUrl] = React.useState(null);
     const [shareuser, setShareuser] = React.useState(0);
-    // const [state,setState] =React.useState({props.})
-    const [userdata, setUserdata] = React.useState([]);
+    const [usertem, setUsertem] = React.useState('');
+    const [Review, setReview] = React.useState('');
+    const currentuser = JSON.parse(localStorage.getItem('userData'));
+    const [userdata, setUserdata] = React.useState([currentuser.id]);
     const [desc, setDesc] = React.useState('');
 
-    useEffect(() => {
+    useEffect((props, upload, group) => {
         if (props.group === 1) {
             setUpload(true);
         }
         if (props.group === 2) {
             setGroup(true);
-            // Axios.get(`http://localhost:5000/getusers`)
-            //     .then(res => {
-            //         console.log(res.data);
-            //         setUserdata(res.data.data);
-            //     })
         }
 
         console.log(upload, group);
@@ -59,12 +57,17 @@ export default function FormDialog(props) {
         setOpen(true);
     };
     const handleImage = () => {
-        const data = JSON.parse(sessionStorage.getItem('userData'));
+        const data = JSON.parse(localStorage.getItem('userData'));
         let formData = new FormData();
+        // var datas = base64Img.base64Sync(SelectedFile);
+        // formData.append("image64", datas)
+        console.log(Review);
         formData.set("sharedid", shareuser);
         formData.set("owner", data.id);
+        formData.set("review", Review);
         formData.set("description", desc);
         formData.append("image", SelectedFile);
+
         console.log(formData);
         console.log(data, data.name, data.email, data.id);
         Axios.post('http://localhost:5000/imageupload', formData)
@@ -76,6 +79,27 @@ export default function FormDialog(props) {
                 }
             })
     }
+    const handlegroupname = (event) => {
+        setGroupname(event.target.value);
+    }
+    const handleUsers = (event) => {
+        console.log(event.target.value)
+        setUsertem(event.target.value);
+        setInse(inse + 1);
+        if (inse === 0) {
+            setUserdata(userdata, usertem);
+            console.log(userdata);
+
+        }
+        else if (inse > 0) {
+            setUserdata(userdata => [...userdata, usertem]);
+
+        }
+    }
+    const handlereview = (event) => {
+        setReview(event.target.value)
+        console.log(event.target.value);
+    }
     const handleClose = () => {
         setOpen(false);
     };
@@ -85,15 +109,16 @@ export default function FormDialog(props) {
     const changedesc = (event) => {
         setDesc(event.target.value)
     }
-    const fileChangedHandler = event => {
-        console.log('hello')
-        setSelectedFile(event.target.files[0])
-        let reader = new FileReader();
-        console.log(event.target.files[0], SelectedFile)
-        reader.onloadend = () => {
-            setimagePreviewUrl(reader.result)
-        }
-        reader.readAsDataURL(event.target.files[0])
+    const creategroup = () => {
+        console.log(userdata);
+        Axios.post(`http://localhost:5000/creategroup`, { groupname: groupname, users: userdata })
+            .then(res => {
+                console.log(res);
+                if (res.data.success === true) {
+                    swal('group is created successfully', 'check groups tab', 'success');
+                }
+            })
+        setOpen(false);
 
     }
     return (
@@ -104,14 +129,14 @@ export default function FormDialog(props) {
                         Open Upload dialog
       </Button>
                     <Dialog open={open} onClose={handleClose} aria-labelledby="form-dialog-title">
-                        <DialogTitle id="form-dialog-title">Subscribe</DialogTitle>
+                        <DialogTitle id="form-dialog-title">UPLOAD</DialogTitle>
                         <DialogContent>
                             <input
                                 type="file"
                                 class="input-upload"
                                 name="myfile"
                                 accept="image/*"
-                                onChange={fileChangedHandler} />
+                            />
                             <TextField
                                 autoFocus
                                 margin="dense"
@@ -131,6 +156,17 @@ export default function FormDialog(props) {
                                 {props.groups.map(data => (<MenuItem value={data.id}>{data.name}</MenuItem>))}
 
                             </Select>
+                            <label>Do you want a Review ?</label>
+                            <Select
+                                labelId="demo-simple-select-label"
+                                id="demo-simple-select"
+                                value={Review}
+                                onChange={handlereview}
+                            >
+                                <MenuItem value='yes'>Yes</MenuItem>
+                                <MenuItem value='no'>No</MenuItem>
+                            </Select>
+
                         </DialogContent>
                         <DialogActions>
                             <Button onClick={handleClose} color="primary">
@@ -155,26 +191,31 @@ export default function FormDialog(props) {
                                 margin="dense"
                                 id="name"
                                 label="group name"
+                                onChange={handlegroupname}
                                 type="text"
                                 fullWidth
                             />
                             <FormControl component="fieldset" className={classes.formControl}>
                                 <FormLabel component="legend">Choose members</FormLabel>
-                                <FormGroup>
+                                <Select
+                                    labelId="demo-simple-select-label"
+                                    id="demo-simple-select"
+                                    value={usertem}
+                                    onChange={handleUsers}
+                                >
+
                                     {props.users.map((data) => (
-                                        <FormControlLabel
-                                            control={<Checkbox checked={data.name} onChange={handleChange} name="gilad" />}
-                                            label={data.name}
-                                        />
+                                        <MenuItem value={data.id}>{data.name}</MenuItem>
                                     ))}
-                                </FormGroup>
+                                </Select>
+                                {userdata.map((data) => (<span>{data}</span>))}
                             </FormControl>
                         </DialogContent>
                         <DialogActions>
                             <Button onClick={handleClose} color="primary">
                                 Cancel
           </Button>
-                            <Button onClick={handleClose} color="primary">
+                            <Button onClick={creategroup} color="primary">
                                 Create Group
           </Button>
                         </DialogActions>

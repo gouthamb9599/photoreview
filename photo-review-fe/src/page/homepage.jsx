@@ -1,4 +1,5 @@
 import React from 'react';
+import { BrowserRouter as Router, Switch, Route, Link, withRouter } from 'react-router-dom';
 import Drawer from '../components/drawer';
 import Axios from 'axios';
 class Homepage extends React.Component {
@@ -9,10 +10,14 @@ class Homepage extends React.Component {
             groupsarray: [],
         }
     }
+    logout = () => {
+        sessionStorage.removeItem('userData');
+        this.props.history.push('/');
+    }
     render() {
         return (
             <div>
-                <Drawer users={this.state.usersarray} groups={this.state.groupsarray}></Drawer>
+                <Drawer users={this.state.usersarray}></Drawer>
             </div>
         )
     }
@@ -26,16 +31,7 @@ class Homepage extends React.Component {
                     })
                 }
             })
-        Axios.get(`http://localhost:5000/getgroups`)
-            .then(res => {
-                console.log(res);
-                if (res.data.success === true) {
-                    this.setState({
-                        groupsarray: res.data.data
-                    })
-                }
-            })
     };
 
 }
-export default Homepage;
+export default withRouter(Homepage);

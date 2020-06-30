@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Drawer from '@material-ui/core/Drawer';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -17,6 +17,7 @@ import ImageTwoToneIcon from '@material-ui/icons/ImageTwoTone';
 import { Button } from '@material-ui/core';
 import Axios from 'axios';
 import Dialog from '../components/dialog';
+import live from '../images/image.png';
 import '../styles/drawer.css';
 
 const drawerWidth = 240;
@@ -47,17 +48,34 @@ const useStyles = makeStyles((theme) => ({
 
 export default function PermanentDrawerLeft(props) {
     const classes = useStyles();
+    const [groupsarray, setGroupsarray] = React.useState([]);
+    const [uploadarray, setUploadarray] = React.useState([]);
+    const [usershared, setUsershared] = React.useState([]);
+    const [shareddatau, setShareddatau] = React.useState(false);
+    const [shareddatag, setShareddatag] = React.useState(false);
+    const [groupshared, setGroupshared] = React.useState([]);
     const [users, setUsers] = React.useState(false);
+    const [uploads, setUploads] = React.useState(false);
     const [openupload, setOpenupload] = React.useState(false);
     const [opencreateg, setOpencreateg] = React.useState(false);
     const [groups, setGroups] = React.useState(false);
     const [dialog, setDialog] = React.useState(false);
     const viewusers = () => {
-        setUsers(true);
+
+        setUsers(!users);
     }
     const viewgroups = () => {
-        setGroups(true);
+        const data = JSON.parse(localStorage.getItem('userData'));
+        Axios.get(`http://localhost:5000/getgroups?userid=${data.id}`)
+            .then(res => {
+                console.log(res);
+                if (res.data.success === true) {
+                    setGroupsarray(res.data.data)
+                }
+            })
+        setGroups(!groups);
     }
+
     const uploadimg = () => {
         setOpenupload(true);
     }
@@ -65,6 +83,36 @@ export default function PermanentDrawerLeft(props) {
         setOpencreateg(true);
     }
     const viewuploads = () => {
+        const data = JSON.parse(localStorage.getItem('userData'));
+        Axios.get(`http://localhost:5000/getuploads?userid=${data.id}`)
+            .then(res => {
+                console.log(res);
+                if (res.data.success === true) {
+                    setUploadarray(res.data.data);
+                }
+            })
+        setUploads(!uploads);
+    }
+    const handleClickuser = (id) => {
+        Axios.get(`http://localhost:5000/getshareduserimages?id=${id}`)
+            .then(res => {
+                // console.log(res);
+                if (res.data.success == true) {
+                    setUsershared(res.data.data)
+                    setShareddatau(true);
+                    // console.log(res.data.data);
+                }
+
+            })
+    }
+    const handleClickgroup = (id) => {
+        Axios.get(`http://localhost:5000/getsharedgroupimages?id=${id}`)
+            .then(res => {
+                // console.log(res);
+                if (res.data.success == true) {
+                    setGroupshared(res.data.data);
+                }
+            })
 
     }
 
@@ -82,7 +130,7 @@ export default function PermanentDrawerLeft(props) {
                             position: "absolute",
                             right: "0",
                             color: "white"
-                        }} className="logbutton" variant="h6" noWrap>Logout</Button>
+                        }} className="logbutton" onClick={props.logout} variant="h6" noWrap>Logout</Button>
                     </Toolbar>
                 </AppBar>
                 <Drawer
@@ -121,28 +169,39 @@ export default function PermanentDrawerLeft(props) {
                             <ListItemText primary='Create Group' />
                         </ListItem>
                     </List>
-                    {openupload ? <Dialog group={1} users={props.users} groups={props.groups}></Dialog> : <></>}
-                    {opencreateg ? <Dialog group={2} users={props.users} groups={props.groups}></Dialog> : <></>}
+                    {openupload ? <Dialog group={1} users={props.users} groups={groupsarray}></Dialog> : <></>}
+                    {opencreateg ? <Dialog group={2} users={props.users} groups={groupsarray}></Dialog> : <></>}
                 </Drawer>
             </div>
             <div>
                 {users ? <div className="displayset">
                     <h3>Users</h3>
                     <div >
-                        {props.users.map((data) => (<div>
-
-                            <div>{data.name}</div>
-                        </div>))}
+                        {props.users.map((data) => (
+                            <div>
+                                <Button onClick={handleClickuser(data.id)}>{data.name}</Button>
+                            </div>))}
                     </div>
                 </div> : <></>}
-                {groups ? <div>
-                    <h3>Users</h3>
+                {groups ? <div className="displayset">
+                    <h3>Groups</h3>
                     <div>
-                        {props.groups.map((data) => (<div>
-                            <h5>{data.name}</h5>
+                        {groupsarray.map((data) => (<div>
+                            <Button onClick={handleClickgroup(data.id)}>{data.name}</Button>
                         </div>))}
                     </div>
                 </div> : <></>}
+                {uploads ? <div className="displayset">
+                    {uploadarray.map(data =>
+                        <div>
+                            ID:{data.id}
+                            <img src={live} height="100" width="200" />
+                        </div>
+                    )}
+                </div> : <></>}
+                <div>
+
+                </div>
             </div>
 
         </div>

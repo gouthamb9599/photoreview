@@ -17,8 +17,8 @@ export class Login extends Component {
     check = (e) => {
         axios.post('http://localhost:5000/login', { email: this.state.email, password: this.state.password })
             .then((result) => {
-                sessionStorage.setItem("userData", JSON.stringify(result.data.data));
-                this.props.history.push('/home')
+                localStorage.setItem("userData", JSON.stringify(result.data.data));
+                this.props.history.push('/home');
             });
     }
     handleChange = (e) => {

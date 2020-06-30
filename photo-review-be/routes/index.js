@@ -1,6 +1,7 @@
 const client = require('../config/database')
 const jwt = require('jsonwebtoken')
 var multer = require('multer');
+const imageToBase64 = require('image-to-base64');
 const route = app => {
     const storage = multer.diskStorage({
         destination(req, file, cb) {
@@ -23,7 +24,7 @@ const route = app => {
     //     });
     // });
     app.post('/login', (req, res) => {
-        console.log(req.body);
+        // console.log(req.body);
         const data = req.body;
         client.query(`select * from account where email=$1 and password=$2`, [data.email, data.password],
             (err, results) => {
@@ -61,12 +62,13 @@ const route = app => {
             }
         })
     })
+
     app.post('/imageupload', upload.single('image'), (req, res) => {
         const data = req.body;
         const name = req.file.filename;
-        const str = `http://localhost:5003/images/${name}`;
+        const str = `http://localhost:5000/images/${name}`;
         // console.log('69', str, data.description, data.owner, data.sharedid);
-        client.query(`insert into Image(image,description,owner,shared) values($1,$2,$3,$4) RETURNING *`, [str, data.description, data.owner, data.sharedid],
+        client.query(`insert into Image(image,description,owner,shared,review) values($1,$2,$3,$4,$5) RETURNING *`, [str, data.description, data.owner, data.sharedid, data.review],
             (err, results) => {
                 if (err) console.log(err);
                 else {
@@ -75,7 +77,89 @@ const route = app => {
                     }
                 }
             })
+    })
+    app.post('/creategroup', (req, res) => {
+        // console.log(req.body);
+        const data = req.body
+        client.query(`insert into groups(name) values($1) RETURNING id`, [data.groupname],
+            (err, results) => {
+                if (err) console.log(err);
+                else {
+                    if (results.rowCount !== 0) {
+                        const usersarray = data.users;
+                        for (var counter = 0; counter < usersarray.length; counter++) {
+                            client.query(`insert into members(groupid,userid) values($1,$2) RETURNING *`, [results.rows[0].id, usersarray[counter]],
+                                (err, results) => {
+                                    if (err) console.log(err);
+                                    else {
+                                        res.send({ success: true })
+                                        // console.log(results, counter);
+                                        // counter = counter + 1;
+                                    }
+                                })
+                        }
 
+                    }
+                }
+
+            })
+    })
+    app.get('/getgroups', (req, res) => {
+        const id = req.query.userid;
+        console.log('12', id);
+        client.query(`select * from members where userid=$1`, [id], (err, results) => {
+            if (err) console.log(err);
+            else {
+                if (results.rowCount !== 0) {
+                    client.query(`select * from groups where id=$1 `, [results.rows[0].groupid],
+                        (err, result) => {
+                            if (err) console.log(err);
+                            else {
+                                // console.log(result);
+                                res.send({ success: true, data: result.rows })
+                            }
+                        });
+                }
+            }
+        })
+    })
+    app.get('/getuploads', (req, res) => {
+        const id = req.query.userid;
+        client.query(`select * from  image where owner=$1`, [id], (err, results) => {
+            if (err) console.log(err);
+            else {
+                if (results.rowCount !== 0) {
+                    res.send({ success: true, data: results.rows })
+                }
+            }
+        })
+    })
+    app.get('/getshareduserimages', (req, res) => {
+        const id = req.query.id;
+        client.query(`select * from image where shared=$1`, [id],
+            (err, results) => {
+                if (err) console.log(err);
+                else {
+                    if (results.rowCount !== 0) {
+                        res.send({ success: true, data: results.rows })
+                    }
+                }
+
+            })
+    })
+    app.get('/getsharedgroupimages', (req, res) => {
+        const id = req.query.id;
+        client.query(`select * from image where shared=$1`, [id],
+            (err, results) => {
+                if (err) console.log(err);
+                else {
+                    // console.log(results);
+                    if (results.rowCount !== 0) {
+                        res.send({ success: true, data: results.rows })
+                    }
+                }
+
+            })
     })
 }
 
