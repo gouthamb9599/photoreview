@@ -218,25 +218,25 @@ export default function PermanentDrawerLeft(props) {
                     )}
                 </div> : <></>}
                 {shareddatau ? <div>
-                    <div>{usershared.map(data => <div>
-                        <img src={data.image} height="100" width="200" />)
+                    <div>{usershared.map(data =>
+                        <div>
+                            <img src={data.image} height="100" width="200" />)
                     {data.review ?
-                            <div><Input type="text" value={review} onChange={handlereview} placeholder="Enter your reply"></Input>
-                                <Button onClick={submit}>submit</Button></div> : <></>}
+                                <div><Input type="text" value={review} onChange={handlereview} placeholder="Enter your reply"></Input>
+                                    <Button onClick={submit}>submit</Button></div> : <></>}
+                        </div>)}
                     </div>
-                                </div>}
 
                 </div> : <></>}
                 {shareddatag ?
-                    <div>{groupshared.map(data => <div>
-                        <img src={data.image} height="100" width="200" />)
+                    <div>{groupshared.map(data =>
+                        <div>
+                            <img src={data.image} height="100" width="200" />)
                     {data.review ?
-                            <div><Input type="text" value={review} onChange={handlereview} placeholder="Enter your reply"></Input>
-                                <Button onClick={submit}>submit</Button></div> : <></>}
-                    </div>
-                                </div>}
-
-
+                                <div><Input type="text" value={review} onChange={handlereview} placeholder="Enter your reply"></Input>
+                                    <Button onClick={submit}>submit</Button></div> : <></>}
+                        </div>)}
+                    </div> : <></>}
             </div>
 
         </div>
